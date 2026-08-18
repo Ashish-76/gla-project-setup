@@ -1,50 +1,83 @@
-const User = require("../../../Models/UserSchema/user")
+const User = require("../../../Models/UserSchema/user");
 const bcrypt = require("bcrypt");
 
 const register = async (req, res) => {
     try {
+        const { name, email, password, phone, role } = req.body;
 
-        const { name, email, password } = req.body;
-
-        // checking the User 
-        const checkExistingUser = await User.findOne({ email });
- 
-        if (checkExistingUser) {
+        // Basic validation
+        if (!name || !email || !password) {
             return res.status(400).json({
-                message: "User Already Exists"
+                success: false,
+                message: "Name, email and password are required"
             });
         }
 
-
-        //  Password Hasihng
-        console.log("Password Before Hashing:", password);
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        console.log("Password After Hashing:", hashedPassword);
-
-        const user = new User({
-            name,
-            email,
-            password: hashedPassword
-           
+        // Check if user already exists
+        const existingUser = await User.findOne({
+            email: email.toLowerCase()
         });
 
-        const data = await user.save();
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "User with this email already exists"
+            });
+        }
 
-        res.status(201).json({
-            message: "Registration Successful",
-            registeredData: data
+        // Validate password length
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters long"
+            });
+        }
+
+        // Only allow attendee/organizer during normal registration
+        const allowedRoles = ["attendee", "organizer"];
+        const selectedRole = role || "attendee";
+
+        if (!allowedRoles.includes(selectedRole)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid role"
+            });
+        }
+
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, 12);
+
+        // Create user
+        const user = new User({
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            passwordHash,
+            phone: phone || "",
+            role: selectedRole
+        });
+
+        await user.save();
+
+        // Never send password/hash to client
+        return res.status(201).json({
+            success: true,
+            message: "Registration successful",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role
+            }
         });
 
     } catch (error) {
+        console.error("Registration error:", error.message);
 
-        console.log(error);
-
-        res.status(500).json({
-            message: error.message
+        return res.status(500).json({
+            success: false,
+            message: "Server error during registration"
         });
-
     }
 };
 

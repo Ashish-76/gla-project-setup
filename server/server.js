@@ -1,39 +1,71 @@
-const express= require("express")
-const app= express()
-const connectDB= require("./Backend Configuration/Configuration Folders/DB Configuration/dbCofig")
-const cors=require("cors")
-const RegistrationApi= require("./Backend Configuration/Routes/Registration & Login Route/Register/register")
-const getUsers= require("./Backend Configuration/Routes/Get All User Route/getUser")
-const deleteUsers= require("./Backend Configuration/Routes/User Data Deleted/userDataDelete")
-const updatedUser= require("./Backend Configuration/Routes/User Updation Route/userUpdateRoute")
-const LoginRoute= require("./Backend Configuration/Routes/Registration & Login Route/Login/loginRoute")
+require("dotenv").config();
+
+const express = require("express");
+const cors = require("cors");
+
+const app = express();
 
 
+// Middleware
 
-app.use(express.json())
-app.use(cors())
-
-connectDB()
-
+app.use(express.json());
+app.use(cors());
 
 
-app.use("/api", RegistrationApi)
-app.use("/api", getUsers)
-app.use("/api", deleteUsers)
-app.use("/api", updatedUser)
-app.use("/api",LoginRoute)
+// Database
+
+const connectDB = require(
+    "./Backend Configuration/Configuration Folders/DB Configuration/dbConfig"
+);
+
+connectDB();
+
+// Authentication Routes
+
+const RegistrationApi = require(
+    "./Backend Configuration/Routes/Registration & Login Route/Register/register"
+);
+
+const LoginRoute = require(
+    "./Backend Configuration/Routes/Registration & Login Route/Login/loginRoute"
+);
+
+app.use("/api/auth", RegistrationApi);
+app.use("/api/auth", LoginRoute);
 
 
+// Protected Test Route
+
+const protectedRoute = require(
+    "./Backend Configuration/Routes/Test Route/protectedRoute"
+);
+
+app.use("/api/test", protectedRoute);
+
+// Event Routes
 
 
-app.listen(4000,()=>{
-    console.log("Your Server is running at port 4000")
-})
+const eventRoutes = require(
+    "./Backend Configuration/Routes/Event Route/eventRoutes"
+);
+
+app.use("/api/events", eventRoutes);
+
+// Health Check
 
 
+app.get("/api/health", (req, res) => {
+    res.json({
+        success: true,
+        message: "Event Ticketing API is running"
+    });
+});
 
-// HTML 
-// CSS
-// JS
-// React 
-// NodeJS 
+// Server
+
+
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
