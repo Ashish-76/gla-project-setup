@@ -5,7 +5,10 @@ const router = express.Router();
 const {
     createEvent,
     getAllEvents,
-    getEventById
+    getMyEvents,
+    getEventById,
+    updateEvent,
+    deleteEvent
 } = require("../../Controllers/Event Controller/eventController");
 
 const authMiddleware = require(
@@ -18,22 +21,52 @@ const roleMiddleware = require(
 
 
 // GET ALL EVENTS
-// Public route
+// Public
 router.get("/", getAllEvents);
+
+// GET MY EVENTS
+// Organizer + Admin
+
+router.get(
+    "/my",
+    authMiddleware,
+    roleMiddleware("organizer", "admin"),
+    getMyEvents
+);
 
 
 // GET SINGLE EVENT
-// Public route
+// Public
 router.get("/:id", getEventById);
 
 
 // CREATE EVENT
-// Organizer + Admin only
+// Organizer + Admin
 router.post(
     "/",
     authMiddleware,
     roleMiddleware("organizer", "admin"),
     createEvent
+);
+
+
+// UPDATE EVENT
+// Organizer + Admin
+router.put(
+    "/:id",
+    authMiddleware,
+    roleMiddleware("organizer", "admin"),
+    updateEvent
+);
+
+
+// DELETE EVENT
+// Organizer + Admin
+router.delete(
+    "/:id",
+    authMiddleware,
+    roleMiddleware("organizer", "admin"),
+    deleteEvent
 );
 
 

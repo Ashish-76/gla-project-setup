@@ -5,23 +5,20 @@ const cors = require("cors");
 
 const app = express();
 
-
 // Middleware
-
 app.use(express.json());
 app.use(cors());
 
 
 // Database
-
 const connectDB = require(
     "./Backend Configuration/Configuration Folders/DB Configuration/dbConfig"
 );
 
 connectDB();
 
-// Authentication Routes
 
+// Authentication Routes
 const RegistrationApi = require(
     "./Backend Configuration/Routes/Registration & Login Route/Register/register"
 );
@@ -35,25 +32,36 @@ app.use("/api/auth", LoginRoute);
 
 
 // Protected Test Route
-
 const protectedRoute = require(
     "./Backend Configuration/Routes/Test Route/protectedRoute"
 );
 
 app.use("/api/test", protectedRoute);
 
+
 // Event Routes
-
-
 const eventRoutes = require(
     "./Backend Configuration/Routes/Event Route/eventRoutes"
 );
 
 app.use("/api/events", eventRoutes);
 
+
+// Booking Routes
+const bookingRoutes = require(
+    "./Backend Configuration/Routes/Booking Route/bookingRoutes"
+);
+
+app.use("/api/bookings", bookingRoutes);
+
+// User Routes
+const getUserRoutes = require(
+    "./Backend Configuration/Routes/Get All User Route/getUser"
+);
+
+app.use("/api", getUserRoutes);
+
 // Health Check
-
-
 app.get("/api/health", (req, res) => {
     res.json({
         success: true,
@@ -61,9 +69,8 @@ app.get("/api/health", (req, res) => {
     });
 });
 
+
 // Server
-
-
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {

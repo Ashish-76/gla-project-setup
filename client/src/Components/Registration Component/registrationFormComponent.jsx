@@ -22,13 +22,13 @@ function handleChange(e){
 async function handleSubmit(e){
     e.preventDefault();
 try {
-    const response= await axios.post("http://localhost:4000/api/registration/api",user)
+    const response= await axios.post("http://localhost:4000/api/auth/register", user)
     alert("Data has been sucessfully submitted")
-    setUser[{
+    setUser({
         name:"",
         email:"",
         password:""
-    }]
+    })
 
 } catch (error) {
     console.log(error)

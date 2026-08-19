@@ -1,26 +1,78 @@
-const express= require("express")
-const router= express.Router()
-const getUser= require("../../Controllers/Get All User Controller/getUser") 
-const verifyToken=require("../../Configuration Folders/Middleware Configuration/authMiddleware")
-const authorize=require("../../Configuration Folders/Middleware Configuration/roleSpecificMiddleware")
+const express = require("express");
+
+const router = express.Router();
 
 
-router.get("/getData",verifyToken, getUser)
-// router.get("/getData",verifyToken,authorize("admin"), getUser)
-router.get("/getData/admin/api",verifyToken,authorize("admin"), (req,res)=>{
-    res.json({
-        message:"welcome Admin"
+// Controllers
+const getUser = require(
+    "../../Controllers/Get All User Controller/getUser"
+);
 
-    })
-})
-
-router.get("/getData/api",verifyToken,authorize("student"), (req,res)=>{
-    res.json({
-        message:"welcome Student"
-        
-
-    })
-})
+const {
+    updateUserStatus,
+    updateUserRole,
+    deleteUser
+} = require(
+    "../../Controllers/Admin User Controller/adminUserController"
+);
 
 
-module.exports= router;
+// Middleware
+const verifyToken = require(
+    "../../Configuration Folders/Middleware Configuration/authMiddleware"
+);
+
+const authorize = require(
+    "../../Configuration Folders/Middleware Configuration/roleMiddleware"
+);
+
+
+
+// GET ALL USERS
+// Admin only
+
+router.get(
+    "/getData",
+    verifyToken,
+    authorize("admin"),
+    getUser
+);
+
+
+
+// ACTIVATE / DEACTIVATE USER
+// Admin only
+
+router.patch(
+    "/admin/users/:id/status",
+    verifyToken,
+    authorize("admin"),
+    updateUserStatus
+);
+
+
+
+// CHANGE USER ROLE
+// Admin only
+
+router.patch(
+    "/admin/users/:id/role",
+    verifyToken,
+    authorize("admin"),
+    updateUserRole
+);
+
+
+
+// DELETE USER
+// Admin only
+
+router.delete(
+    "/admin/users/:id",
+    verifyToken,
+    authorize("admin"),
+    deleteUser
+);
+
+
+module.exports = router;
